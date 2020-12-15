@@ -24,7 +24,7 @@ const DateInput = (props) => {
         width: '35%',
         height: 25,
         flexDirection: 'row',
-        borderRadius: 2,
+        borderRadius: 4,
         alignItems: 'center',
         justifyContent: 'space-between',
         marginHorizontal: 10,
@@ -208,10 +208,127 @@ const HeaderMenu = (props) => {
   );
 };
 
-class TreeView extends React.Component {
+const LocationInfo = (props) => {
+  return (
+    <View>
+      <Text style={{fontSize: 12, fontWeight: 'bold', textAlign: props.align}}>
+        {props.location ? props.location : 'Location'}
+      </Text>
+      <Text style={{fontSize: 12, textAlign: props.align}}>
+        {props.city ? props.city : 'City'}
+      </Text>
+      <Text style={{fontSize: 12, textAlign: props.align}}>
+        {props.timing ? props.timing : 'Timing'}
+      </Text>
+      <Text style={{fontSize: 12, textAlign: props.align}}>
+        {props.date ? props.date : 'Date'}
+      </Text>
+      <Text style={{fontSize: 12, textAlign: props.align}}>
+        {props.coin ? props.coin : 'Coins'}
+      </Text>
+    </View>
+  );
+};
+
+const Location = (props) => {
+  return (
+    <View
+      style={{
+        width: '100%',
+        flexDirection: 'row',
+        justifyContent: props.left ? 'flex-start' : 'flex-end',
+      }}>
+      {props.left ? <LocationInfo align="left" /> : <View />}
+      <View style={{width: 40, justifyContent: 'flex-end', paddingVertical: 5}}>
+        <View
+          style={{
+            width: 15,
+            height: 12,
+            bottom: -55,
+            left: 5,
+            zIndex: -1,
+            borderRadius: 8,
+            alignSelf: 'center',
+            backgroundColor: '#ffa700',
+          }}
+        />
+        <MIcon
+          name="location-on"
+          size={50}
+          color="#8ca5ce"
+          style={{width: 50, height: 50, zIndex: -1}}
+        />
+      </View>
+      {props.right ? <LocationInfo align="right" /> : <View />}
+    </View>
+  );
+};
+
+const TreeView = (props) => {
+  return (
+    <View style={{width: '100%', paddingHorizontal: 10}}>
+      <Location left={true} />
+      <Location right={true} />
+      <Location left={true} />
+    </View>
+  );
+};
+
+const Card = (props) => {
+  return (
+    <View
+      style={{
+        width: '100%',
+        height: 100,
+        flexDirection: 'row',
+        borderRadius: 10,
+        backgroundColor: '#98be57',
+      }}>
+      <View
+        style={{
+          width: '25%',
+          alignItems: 'center',
+          justifyContent: 'center',
+          borderRadius: 10,
+          overflow: 'hidden',
+        }}>
+        <Image
+          source={require('../assets/images/logo.png')}
+          style={{
+            width: 80,
+            height: 80,
+            resizeMode: 'contain',
+            backgroundColor: '#fff',
+          }}
+        />
+      </View>
+      <View
+        style={{
+          width: '50%',
+          justifyContent: 'space-evenly',
+          paddingVertical: 10,
+          paddingHorizontal: 5,
+        }}>
+        <Text style={{color: '#fff', fontSize: 14, fontWeight: 'bold'}}>
+          Title
+        </Text>
+        <Text style={{color: '#fff', fontSize: 12}}>City</Text>
+        <Text style={{color: '#fff', fontSize: 12}}>Duration</Text>
+        <Text style={{color: '#fff', fontSize: 12}}>Coins</Text>
+      </View>
+      <View style={{width: '25%', paddingVertical: 10}}>
+        <Text style={{color: '#fff', fontSize: 14, fontWeight: 'bold'}}>
+          Coins
+        </Text>
+      </View>
+    </View>
+  );
+};
+
+class App extends React.Component {
   render() {
     return (
-      <View style={{flex: 1}}>
+      <View style={{flex: 1, backgroundColor: '#fff'}}>
         <View>
           <ImageBackground
             source={headerImage}
@@ -264,33 +381,36 @@ class TreeView extends React.Component {
                     height: 25,
                     alignItems: 'center',
                     justifyContent: 'center',
-                    borderRadius: 2,
+                    borderRadius: 4,
                     backgroundColor: '#fff',
                   }}>
-                  <MIcon name="refresh" size={25} color="#9ec5bd" />
+                  <MIcon name="refresh" size={20} color="#9ec5bd" />
                 </View>
               </View>
               <View style={{height: 10}} />
             </View>
           </ImageBackground>
         </View>
-        <View>
-          <View
-            style={{
-              width: '100%',
-              height: 200,
-              top: -30,
-              paddingHorizontal: 5,
-            }}>
-            <Header />
-            <View>
-              <HeaderMenu />
-            </View>
+        <View
+          style={{
+            width: '100%',
+            height: 200,
+            top: -30,
+            paddingHorizontal: 5,
+          }}>
+          <Header />
+          <View>
+            <HeaderMenu />
           </View>
+        </View>
+        <View>
+          <Card />
         </View>
       </View>
     );
   }
 }
 
-export default TreeView;
+export default App;
+
+// API URL : https://api.npoint.io/53b1538e188ebed5d432

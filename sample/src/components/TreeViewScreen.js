@@ -1,4 +1,5 @@
-import React from 'react';
+/* eslint-disable react-native/no-inline-styles */
+import React, {useState, useEffect} from 'react';
 import {
   Dimensions,
   Image,
@@ -9,6 +10,7 @@ import {
   View,
 } from 'react-native';
 import MIcon from 'react-native-vector-icons/MaterialIcons';
+import FIcon from 'react-native-vector-icons/FontAwesome';
 import SLIcon from 'react-native-vector-icons/SimpleLineIcons';
 import headerImage from '../assets/images/background.jpg';
 
@@ -20,9 +22,9 @@ const DateInput = (props) => {
     <View
       style={{
         width: '35%',
-        height: 28,
+        height: 25,
         flexDirection: 'row',
-        borderRadius: 4,
+        borderRadius: 2,
         alignItems: 'center',
         justifyContent: 'space-between',
         marginHorizontal: 10,
@@ -84,7 +86,7 @@ const Header = (props) => {
     <View
       style={{
         width: '100%',
-        height: 60,
+        height: 50,
         paddingLeft: 15,
         borderTopRightRadius: 10,
         backgroundColor: '#ed9873',
@@ -103,12 +105,13 @@ const Header = (props) => {
 };
 
 const HeaderMenu = (props) => {
+  const [selected, setSelected] = useState(false);
   return (
-    <View>
+    <View style={{paddingHorizontal: 5}}>
       <View
         style={{
           width: '100%',
-          height: 30,
+          height: 20,
         }}
       />
       <View
@@ -120,12 +123,14 @@ const HeaderMenu = (props) => {
           justifyContent: 'center',
           padding: 5,
         }}>
-        <TouchableOpacity>
-          <Text style={{padding: 2}}>Time View</Text>
+        <TouchableOpacity onPress={() => setSelected(!selected)}>
+          <Text style={{fontWeight: 'bold', paddingVertical: 5}}>
+            Time View
+          </Text>
           <View
             style={{
               height: 2,
-              backgroundColor: '#40e6ea',
+              backgroundColor: selected ? '#fff' : '#40e6ea',
               justifyContent: 'flex-end',
             }}
           />
@@ -138,16 +143,66 @@ const HeaderMenu = (props) => {
             backgroundColor: '#000',
           }}
         />
-        <TouchableOpacity>
-          <Text style={{padding: 2}}>List View</Text>
+        <TouchableOpacity onPress={() => setSelected(!selected)}>
+          <Text style={{fontWeight: 'bold', paddingVertical: 5}}>
+            List View
+          </Text>
           <View
             style={{
               height: 2,
-              backgroundColor: '#40e6ea',
+              backgroundColor: selected ? '#40e6ea' : '#fff',
               justifyContent: 'flex-end',
             }}
           />
         </TouchableOpacity>
+      </View>
+      <View
+        style={{
+          width: '100%',
+          alignItems: 'flex-end',
+          justifyContent: 'center',
+        }}>
+        <View
+          style={{
+            width: '100%',
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'flex-end',
+          }}>
+          <Text style={{fontSize: 12}}>AiScoins</Text>
+          <View
+            style={{
+              width: 12,
+              height: 12,
+              alignItems: 'center',
+              justifyContent: 'center',
+              borderRadius: 10,
+              backgroundColor: '#d5c35d',
+            }}>
+            <FIcon name="dollar" size={8} color="#fff" />
+          </View>
+        </View>
+        <Text style={{color: '#95a4bb', fontSize: 14, fontWeight: 'bold'}}>
+          80
+        </Text>
+      </View>
+      <View style={{alignItems: 'center', top: -15}}>
+        <Text style={{fontWeight: 'bold'}}>Accomodations</Text>
+      </View>
+      <View style={{top: -15}}>
+        <Header />
+      </View>
+      <View>
+        <Image
+          source={require('../assets/images/people-social-group.png')}
+          style={{
+            width: 50,
+            height: 50,
+            resizeMode: 'contain',
+            top: -98,
+            left: 15,
+          }}
+        />
       </View>
     </View>
   );
@@ -162,7 +217,7 @@ class TreeView extends React.Component {
             source={headerImage}
             style={{
               width: '100%',
-              height: 220,
+              height: 200,
             }}>
             <View
               style={{
@@ -179,7 +234,7 @@ class TreeView extends React.Component {
                 placeholder="What are you looking for?"
                 style={{
                   width: '65%',
-                  height: 42,
+                  height: 40,
                   padding: 5,
                   margin: 5,
                   textAlign: 'center',
@@ -197,7 +252,7 @@ class TreeView extends React.Component {
                 }}>
                 <View
                   style={{
-                    width: 28,
+                    width: 20,
                   }}
                 />
                 <DateInput placeholder="Start Date" />
@@ -205,8 +260,8 @@ class TreeView extends React.Component {
 
                 <View
                   style={{
-                    width: 28,
-                    height: 28,
+                    width: 25,
+                    height: 25,
                     alignItems: 'center',
                     justifyContent: 'center',
                     borderRadius: 2,
@@ -215,7 +270,7 @@ class TreeView extends React.Component {
                   <MIcon name="refresh" size={25} color="#9ec5bd" />
                 </View>
               </View>
-              {/* <View style={{height: 20}} /> */}
+              <View style={{height: 10}} />
             </View>
           </ImageBackground>
         </View>

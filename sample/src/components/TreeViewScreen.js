@@ -6,12 +6,14 @@ import {
   Image,
   ImageBackground,
   Modal,
+  ScrollView,
   Text,
   TextInput,
   TouchableOpacity,
   View,
 } from 'react-native';
 import moment from 'moment';
+import {connect} from 'react-redux';
 import momentDurationFormatSetup from 'moment-duration-format';
 import MIcon from 'react-native-vector-icons/MaterialIcons';
 import FIcon from 'react-native-vector-icons/FontAwesome';
@@ -19,9 +21,11 @@ import SLIcon from 'react-native-vector-icons/SimpleLineIcons';
 import headerImage from '../assets/images/background.jpg';
 import API from '../services/api';
 import getRequest from '../services/request';
+import {addApiDate} from '../store/actions/index';
 
 momentDurationFormatSetup(moment);
 const screenWidth = Dimensions.get('screen').width;
+const screenHeight = Dimensions.get('screen').height;
 const barSize = screenWidth / 9;
 
 const Loader = (props) => {
@@ -148,7 +152,7 @@ const Header = (props) => {
 };
 
 const HeaderMenu = (props) => {
-  const [selected, setSelected] = useState(true);
+  const [selected, setSelected] = useState(false);
   useEffect(() => {
     props.viewSelectionHaldler(selected);
   }, [selected]);
@@ -504,13 +508,17 @@ const Card = (props) => {
 const ListView = (props) => {
   return (
     <View style={{width: '100%', paddingHorizontal: 15}}>
-      {props.data.map((item, i) => {
-        return (
-          <View key={i} style={{paddingVertical: 5}}>
-            <Card item={item} />
-          </View>
-        );
-      })}
+      <ScrollView
+        style={{width: '100%', height: screenHeight * 0.4}}
+        scrollEnabled={true}>
+        {props.data.map((item, i) => {
+          return (
+            <View key={i} style={{paddingVertical: 5}}>
+              <Card item={item} />
+            </View>
+          );
+        })}
+      </ScrollView>
     </View>
   );
 };
@@ -541,8 +549,9 @@ class App extends React.Component {
   getApiDate = async () => {
     let response = await getRequest(API);
     if (Array.isArray(response)) {
+      this.props.onAddApiData(response);
       this.setState({
-        apiData: response,
+        apiData: this.props.info.data,
         isLoading: false,
       });
     } else {
@@ -647,6 +656,18 @@ class App extends React.Component {
   }
 }
 
-export default App;
+const mapStateToProps = (state) => {
+  return {
+    info: state.storeInfo,
+  };
+};
+
+const mapDispatchToProps = (dispatch) => {
+  return {
+    onAddApiData: (data) => dispatch(addApiDate(data)),
+  };
+};
+
+export default connect(mapStateToProps, mapDispatchToProps)(App);
 
 // API URL : https://api.npoint.io/53b1538e188ebed5d432

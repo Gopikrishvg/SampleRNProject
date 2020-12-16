@@ -1,9 +1,11 @@
 /* eslint-disable react-native/no-inline-styles */
 import React, {useState, useEffect} from 'react';
 import {
+  ActivityIndicator,
   Dimensions,
   Image,
   ImageBackground,
+  Modal,
   Text,
   TextInput,
   TouchableOpacity,
@@ -21,6 +23,42 @@ import getRequest from '../services/request';
 momentDurationFormatSetup(moment);
 const screenWidth = Dimensions.get('screen').width;
 const barSize = screenWidth / 9;
+
+const Loader = (props) => {
+  const {loading} = props;
+
+  return (
+    <Modal
+      transparent={true}
+      animationType={'none'}
+      visible={loading}
+      onRequestClose={() => {
+        console.log('close modal');
+      }}>
+      <View
+        style={{
+          flex: 1,
+          alignItems: 'center',
+          flexDirection: 'column',
+          justifyContent: 'space-around',
+          backgroundColor: '#00000040',
+        }}>
+        <View
+          style={{
+            backgroundColor: '#FFFFFF',
+            height: 100,
+            width: 100,
+            borderRadius: 10,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-around',
+          }}>
+          <ActivityIndicator color={'skyblue'} size={'large'} />
+        </View>
+      </View>
+    </Modal>
+  );
+};
 
 const DateInput = (props) => {
   return (
@@ -110,7 +148,7 @@ const Header = (props) => {
 };
 
 const HeaderMenu = (props) => {
-  const [selected, setSelected] = useState(false);
+  const [selected, setSelected] = useState(true);
   useEffect(() => {
     props.viewSelectionHaldler(selected);
   }, [selected]);
@@ -220,7 +258,9 @@ const HeaderMenu = (props) => {
 const CoinInfo = (props) => {
   return (
     <View style={{flexDirection: 'row', alignItems: 'center'}}>
-      <Text style={{fontSize: 12}}>{props.coin} AiScoins</Text>
+      <Text style={[{fontSize: 12}, props.coinStyle]}>
+        {props.coin} AiScoins
+      </Text>
       <View
         style={{
           width: 12,
@@ -228,6 +268,7 @@ const CoinInfo = (props) => {
           alignItems: 'center',
           justifyContent: 'center',
           borderRadius: 10,
+          marginHorizontal: 2,
           backgroundColor: '#d5c35d',
         }}>
         <FIcon name="dollar" size={8} color="#fff" />
@@ -322,7 +363,43 @@ const TimeView = (props) => {
   );
 };
 
+const VisitHistory = (props) => {
+  console.log(props);
+  let date = moment(new Date(props.startTime)).format('YYYY MM DD');
+  let startTime = moment(new Date(props.startTime)).format('hh:mm');
+  let endTime = moment(new Date(props.endTime)).format('hh:mm');
+  let coin = props.coinsEarned;
+  return (
+    <View style={{flexDirection: 'row'}}>
+      <Text style={{color: '#fff', fontSize: 14, fontWeight: 'bold'}}>
+        {date}{' '}
+      </Text>
+      <Text style={{color: '#fff', fontSize: 14, fontWeight: 'bold'}}>
+        {startTime}{' '}
+      </Text>
+      <Text style={{color: '#fff', fontSize: 14, fontWeight: 'bold'}}>
+        {endTime}{' '}
+      </Text>
+      <CoinInfo
+        coin={coin}
+        coinStyle={{color: '#fff', fontSize: 14, fontWeight: 'bold'}}
+      />
+    </View>
+  );
+};
+
 const Card = (props) => {
+  const item = props.item;
+  let imageUri = item.contentImgUrl;
+  let location = item.contentName;
+  let coin = item.totalContentCoins;
+  let duration = moment
+    .duration(item.totalTimeSpent, 'minutes')
+    .format('h[h]: m[m]', {
+      trim: false,
+    });
+  let date = moment(new Date(item.eventDateTime)).format('YYYY MM DD');
+
   const [expand, setExpand] = useState(false);
   return (
     <View
@@ -350,7 +427,7 @@ const Card = (props) => {
             overflow: 'hidden',
           }}>
           <Image
-            source={require('../assets/images/logo.png')}
+            source={{uri: imageUri}}
             style={{
               width: 80,
               height: 80,
@@ -367,11 +444,17 @@ const Card = (props) => {
             paddingHorizontal: 5,
           }}>
           <Text style={{color: '#fff', fontSize: 14, fontWeight: 'bold'}}>
-            Title
+            {location}
           </Text>
           <Text style={{color: '#fff', fontSize: 12}}>City</Text>
-          <Text style={{color: '#fff', fontSize: 12}}>Duration</Text>
-          <Text style={{color: '#fff', fontSize: 12}}>Coins</Text>
+          <Text style={{color: '#fff', fontSize: 12}}>
+            {duration} {date}
+          </Text>
+          {coin ? (
+            <CoinInfo coin={coin} coinStyle={{color: '#fff'}} />
+          ) : (
+            <Text>Coins</Text>
+          )}
         </View>
         <View
           style={{
@@ -380,9 +463,11 @@ const Card = (props) => {
             paddingHorizontal: 10,
             alignItems: 'flex-end',
           }}>
-          <Text style={{color: '#fff', fontSize: 14, fontWeight: 'bold'}}>
-            Coins
-          </Text>
+          {coin ? (
+            <CoinInfo coin={coin} coinStyle={{color: '#fff'}} />
+          ) : (
+            <Text>Coins</Text>
+          )}
           <TouchableOpacity
             style={{alignItems: 'flex-end'}}
             onPress={() => setExpand(!expand)}>
@@ -403,9 +488,12 @@ const Card = (props) => {
             borderRadius: 10,
             backgroundColor: '#98be57',
           }}>
-          <View style={{width: '25%'}} />
-          <View style={{width: '75%'}}>
-            <Text>DateTime Coins</Text>
+          <View style={{width: '28%'}} />
+          <View
+            style={{width: '75%', paddingVertical: 10, paddingHorizontal: 5}}>
+            {item.visitHistory.map((history, i) => {
+              return <VisitHistory {...history} key={i} />;
+            })}
           </View>
         </View>
       )}
@@ -419,7 +507,7 @@ const ListView = (props) => {
       {props.data.map((item, i) => {
         return (
           <View key={i} style={{paddingVertical: 5}}>
-            <Card />
+            <Card item={item} />
           </View>
         );
       })}
@@ -443,18 +531,35 @@ class App extends React.Component {
     });
   };
 
-  componentDidMount = async () => {
-    let response = await getRequest(API);
-    console.log('response', response);
+  refreshHandler = () => {
     this.setState({
-      apiData: response,
-      isLoading: false,
+      isLoading: true,
     });
+    this.getApiDate();
+  };
+
+  getApiDate = async () => {
+    let response = await getRequest(API);
+    if (Array.isArray(response)) {
+      this.setState({
+        apiData: response,
+        isLoading: false,
+      });
+    } else {
+      this.setState({
+        isLoading: false,
+      });
+    }
+  };
+
+  componentDidMount = () => {
+    this.getApiDate();
   };
 
   render() {
     return (
       <View style={{flex: 1, backgroundColor: '#fff'}}>
+        <Loader loading={this.state.isLoading} />
         <View>
           <ImageBackground
             source={headerImage}
@@ -501,7 +606,8 @@ class App extends React.Component {
                 <DateInput placeholder="Start Date" />
                 <DateInput placeholder="End Date" />
 
-                <View
+                <TouchableOpacity
+                  onPress={this.refreshHandler}
                   style={{
                     width: 25,
                     height: 25,
@@ -511,7 +617,7 @@ class App extends React.Component {
                     backgroundColor: '#fff',
                   }}>
                   <MIcon name="refresh" size={20} color="#9ec5bd" />
-                </View>
+                </TouchableOpacity>
               </View>
               <View style={{height: 10}} />
             </View>

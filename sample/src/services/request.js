@@ -27,7 +27,7 @@ const getRequest = (url) => {
   return fetch(url, requestOptions)
     .then((response) => response.json())
     .then((response) => {
-      console.log('success..', response);
+      // console.log('success..', response);
       return response;
     })
     .catch((error) => {

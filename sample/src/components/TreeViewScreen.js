@@ -217,6 +217,25 @@ const HeaderMenu = (props) => {
   );
 };
 
+const CoinInfo = (props) => {
+  return (
+    <View style={{flexDirection: 'row', alignItems: 'center'}}>
+      <Text style={{fontSize: 12}}>{props.coin} AiScoins</Text>
+      <View
+        style={{
+          width: 12,
+          height: 12,
+          alignItems: 'center',
+          justifyContent: 'center',
+          borderRadius: 10,
+          backgroundColor: '#d5c35d',
+        }}>
+        <FIcon name="dollar" size={8} color="#fff" />
+      </View>
+    </View>
+  );
+};
+
 const LocationInfo = (props) => {
   console.log(moment(new Date(props.date)).format('YYYY MM DD'));
 
@@ -241,9 +260,9 @@ const LocationInfo = (props) => {
       <Text style={{fontSize: 12, textAlign: props.align}}>
         {props.date ? date : 'Date'}
       </Text>
-      <Text style={{fontSize: 12, textAlign: props.align}}>
-        {props.coin ? props.coin : 'Coins'}
-      </Text>
+      {/* <Text style={{fontSize: 12, textAlign: props.align}}> */}
+      {props.coin ? <CoinInfo coin={props.coin} /> : <Text>Coins</Text>}
+      {/* </Text> */}
     </View>
   );
 };
@@ -254,6 +273,7 @@ const Location = (props) => {
     location: item.contentName,
     duration: item.totalTimeSpent,
     date: item.eventDateTime,
+    coin: item.totalContentCoins,
   };
   return (
     <View

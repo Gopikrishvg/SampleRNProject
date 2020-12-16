@@ -9,11 +9,16 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
+import moment from 'moment';
+import momentDurationFormatSetup from 'moment-duration-format';
 import MIcon from 'react-native-vector-icons/MaterialIcons';
 import FIcon from 'react-native-vector-icons/FontAwesome';
 import SLIcon from 'react-native-vector-icons/SimpleLineIcons';
 import headerImage from '../assets/images/background.jpg';
+import API from '../services/api';
+import getRequest from '../services/request';
 
+momentDurationFormatSetup(moment);
 const screenWidth = Dimensions.get('screen').width;
 const barSize = screenWidth / 9;
 
@@ -106,6 +111,10 @@ const Header = (props) => {
 
 const HeaderMenu = (props) => {
   const [selected, setSelected] = useState(false);
+  useEffect(() => {
+    props.viewSelectionHaldler(selected);
+  }, [selected]);
+
   return (
     <View style={{paddingHorizontal: 5}}>
       <View
@@ -209,6 +218,15 @@ const HeaderMenu = (props) => {
 };
 
 const LocationInfo = (props) => {
+  console.log(moment(new Date(props.date)).format('YYYY MM DD'));
+
+  let duration = moment
+    .duration(props.duration, 'minutes')
+    .format('h[h]: m[m]', {
+      trim: false,
+    });
+  let date = moment(new Date(props.date)).format('YYYY MM DD');
+
   return (
     <View>
       <Text style={{fontSize: 12, fontWeight: 'bold', textAlign: props.align}}>
@@ -218,10 +236,10 @@ const LocationInfo = (props) => {
         {props.city ? props.city : 'City'}
       </Text>
       <Text style={{fontSize: 12, textAlign: props.align}}>
-        {props.timing ? props.timing : 'Timing'}
+        {duration ? duration : 'Duration'}
       </Text>
       <Text style={{fontSize: 12, textAlign: props.align}}>
-        {props.date ? props.date : 'Date'}
+        {props.date ? date : 'Date'}
       </Text>
       <Text style={{fontSize: 12, textAlign: props.align}}>
         {props.coin ? props.coin : 'Coins'}
@@ -231,6 +249,12 @@ const LocationInfo = (props) => {
 };
 
 const Location = (props) => {
+  const item = props.item;
+  const info = {
+    location: item.contentName,
+    duration: item.totalTimeSpent,
+    date: item.eventDateTime,
+  };
   return (
     <View
       style={{
@@ -238,7 +262,7 @@ const Location = (props) => {
         flexDirection: 'row',
         justifyContent: props.left ? 'flex-start' : 'flex-end',
       }}>
-      {props.left ? <LocationInfo align="left" /> : <View />}
+      {props.left ? <LocationInfo align="left" {...info} /> : <View />}
       <View style={{width: 40, justifyContent: 'flex-end', paddingVertical: 5}}>
         <View
           style={{
@@ -259,73 +283,155 @@ const Location = (props) => {
           style={{width: 50, height: 50, zIndex: -1}}
         />
       </View>
-      {props.right ? <LocationInfo align="right" /> : <View />}
+      {props.right ? <LocationInfo align="right" {...info} /> : <View />}
     </View>
   );
 };
 
-const TreeView = (props) => {
+const TimeView = (props) => {
   return (
-    <View style={{width: '100%', paddingHorizontal: 10}}>
-      <Location left={true} />
-      <Location right={true} />
-      <Location left={true} />
+    <View style={{width: '100%', paddingHorizontal: 15}}>
+      {props.data.map((item, i) => {
+        if (i % 2 == 0) {
+          return <Location left={true} key={i} item={item} />;
+        } else {
+          return <Location right={true} key={i} item={item} />;
+        }
+      })}
     </View>
   );
 };
 
 const Card = (props) => {
+  const [expand, setExpand] = useState(false);
   return (
     <View
       style={{
         width: '100%',
-        height: 100,
-        flexDirection: 'row',
+        height: expand ? 200 : 100,
         borderRadius: 10,
-        backgroundColor: '#98be57',
+        // padding: 10,
+        backgroundColor: expand ? '#98be57' : '#fff',
       }}>
       <View
         style={{
-          width: '25%',
-          alignItems: 'center',
-          justifyContent: 'center',
+          width: '100%',
+          height: expand ? '50%' : '100%',
+          flexDirection: 'row',
           borderRadius: 10,
-          overflow: 'hidden',
+          backgroundColor: '#98be57',
         }}>
-        <Image
-          source={require('../assets/images/logo.png')}
+        <View
           style={{
-            width: 80,
-            height: 80,
-            resizeMode: 'contain',
-            backgroundColor: '#fff',
-          }}
-        />
+            width: '28%',
+            alignItems: 'center',
+            justifyContent: 'center',
+            borderRadius: 10,
+            overflow: 'hidden',
+          }}>
+          <Image
+            source={require('../assets/images/logo.png')}
+            style={{
+              width: 80,
+              height: 80,
+              resizeMode: 'contain',
+              backgroundColor: '#fff',
+            }}
+          />
+        </View>
+        <View
+          style={{
+            width: '40%',
+            justifyContent: 'space-evenly',
+            paddingVertical: 10,
+            paddingHorizontal: 5,
+          }}>
+          <Text style={{color: '#fff', fontSize: 14, fontWeight: 'bold'}}>
+            Title
+          </Text>
+          <Text style={{color: '#fff', fontSize: 12}}>City</Text>
+          <Text style={{color: '#fff', fontSize: 12}}>Duration</Text>
+          <Text style={{color: '#fff', fontSize: 12}}>Coins</Text>
+        </View>
+        <View
+          style={{
+            width: '28%',
+            paddingVertical: 10,
+            paddingHorizontal: 10,
+            alignItems: 'flex-end',
+          }}>
+          <Text style={{color: '#fff', fontSize: 14, fontWeight: 'bold'}}>
+            Coins
+          </Text>
+          <TouchableOpacity
+            style={{alignItems: 'flex-end'}}
+            onPress={() => setExpand(!expand)}>
+            <FIcon
+              name={expand ? 'chevron-down' : 'chevron-up'}
+              size={20}
+              color="#fff"
+            />
+          </TouchableOpacity>
+        </View>
       </View>
-      <View
-        style={{
-          width: '50%',
-          justifyContent: 'space-evenly',
-          paddingVertical: 10,
-          paddingHorizontal: 5,
-        }}>
-        <Text style={{color: '#fff', fontSize: 14, fontWeight: 'bold'}}>
-          Title
-        </Text>
-        <Text style={{color: '#fff', fontSize: 12}}>City</Text>
-        <Text style={{color: '#fff', fontSize: 12}}>Duration</Text>
-        <Text style={{color: '#fff', fontSize: 12}}>Coins</Text>
-      </View>
-      <View style={{width: '25%', paddingVertical: 10}}>
-        <Text style={{color: '#fff', fontSize: 14, fontWeight: 'bold'}}>
-          Coins
-        </Text>
-      </View>
+      {expand && (
+        <View
+          style={{
+            width: '100%',
+            height: '50%',
+            flexDirection: 'row',
+            borderRadius: 10,
+            backgroundColor: '#98be57',
+          }}>
+          <View style={{width: '25%'}} />
+          <View style={{width: '75%'}}>
+            <Text>DateTime Coins</Text>
+          </View>
+        </View>
+      )}
+    </View>
+  );
+};
+
+const ListView = (props) => {
+  return (
+    <View style={{width: '100%', paddingHorizontal: 15}}>
+      {props.data.map((item, i) => {
+        return (
+          <View key={i} style={{paddingVertical: 5}}>
+            <Card />
+          </View>
+        );
+      })}
     </View>
   );
 };
 
 class App extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      defaultView: false,
+      isLoading: true,
+      apiData: [],
+    };
+  }
+
+  viewSelectionHaldler = (view) => {
+    this.setState({
+      defaultView: view,
+    });
+  };
+
+  componentDidMount = async () => {
+    let response = await getRequest(API);
+    console.log('response', response);
+    this.setState({
+      apiData: response,
+      isLoading: false,
+    });
+  };
+
   render() {
     return (
       <View style={{flex: 1, backgroundColor: '#fff'}}>
@@ -400,11 +506,15 @@ class App extends React.Component {
           }}>
           <Header />
           <View>
-            <HeaderMenu />
+            <HeaderMenu viewSelectionHaldler={this.viewSelectionHaldler} />
           </View>
         </View>
-        <View>
-          <Card />
+        <View style={{top: -20}}>
+          {this.state.defaultView ? (
+            <ListView data={this.state.apiData} />
+          ) : (
+            <TimeView data={this.state.apiData} />
+          )}
         </View>
       </View>
     );
